@@ -5,94 +5,137 @@ import { pickRandomNote,
          buildRandomScale,
          pickRandomScale,
          buildRandomPattern,
-         buildMelodySegments} from './juke/generator';
+         buildMelodyPattern} from './juke/generator';
+import { createBeatPart,
+         createMelodyPart } from './juke/tone-helpers';
 import { scales, notes, octaves, beatPatterns, timecodes } from './juke/data';
 import { DataArray } from './juke/data-classes';
 
-class JukeTron {
-
+export default class JukeGen {
   constructor() {
-    this.shuffle();
-  }
-
-  get beatPart() {
-    let vol = new Tone.Volume(-5);
-    let beatSynth = new Tone.Synth().chain(vol, Tone.Master);
-    beatSynth.probability = 0.7;
-    let part = new Tone.Part(function(time, note) {
-      beatSynth.triggerAttackRelease(note, '4n', time);
-    }, this.beat);
-    part.loop = true;
-    return part;
-  }
-
-  get pattern() {
-    let synth = new Tone.Synth().toMaster();
-    let pattern = new Tone.Pattern(function(time, note){
-      synth.triggerAttackRelease(note, new DataArray('2n', '4n').randomElement());
-    }, this.part, "randomOnce");
-    pattern.probability = 0.2;
-    return pattern;
-  }
-
-  melody(segment) {
-    let synth = new Tone.Synth().connect(this.melodyAnalyser);
-    let otherSynth = new Tone.Synth().connect(this.melodyAnalyser);
-    let another = new Tone.Synth().connect(this.melodyAnalyser);
-    let part  = new Tone.Part(function(time, value){
-      synth.triggerAttackRelease(value.note, value.duration, time);
-      otherSynth.triggerAttackRelease(value.third, value.duration, time);
-    }, segment);
-    part.probability = 0.8;
-    return part;
-  }
-
-  play() {
-    this.beatPart.start(0);
-    this.pattern.start(0);
-
-    this.melodyParts.forEach((x, i) => {
-      this.melody(x).start(`${2 * i}m`);
-    });
-
-    Tone.Transport.loop = true;
-    Tone.Transport.loopEnd = '5m';
-
-    var loop = new Tone.Loop(function(time){
-      Tone.Draw.schedule(function(){
-        console.log(Tone.Transport.position, Tone.Transport.seconds);
-      }, time) //use AudioContext time of the event
-    }, "1m").start(0);
-  }
-
-  shuffle() {
-    Tone.Transport.clear();
     this.baseNote = pickRandomNote(notes, octaves);
-    console.log(this.baseNote);
-    this.intervalMax = 4;
-    this.beat = buildBeatPattern(beatPatterns, this.baseNote);
+    this.tension = 4;
+    this.notesPerSequence = 12;
     this.scale = buildGivenScale(octaves.randomElement(),
                                  this.baseNote,
                                  pickRandomScale(scales),
                                  notes, scales);
-    this.part = buildRandomPattern(this.scale, this.intervalMax);
-    this.melodyParts = [...Array(4).keys()].map(x => {
-      return buildMelodySegments(this.scale, this.intervalMax, timecodes);
+
+    this.analyser = new Tone.Analyser('fft', 512);
+    this.fft = [];
+    this.volume = new Tone.Volume(0);
+    this.distortion = new Tone.Distortion(0);
+
+    this.distortion.connect(this.analyser);
+    this.analyser.connect(this.volume);
+    this.volume.toMaster();
+
+    this.beat = buildBeatPattern(beatPatterns, this.baseNote);
+    this.beatPart = createBeatPart(this.beatPart, this.volume);
+
+    this.melodies = [];
+    this.genNextMelodySequence(4);
+    this.melodyPart = this.melodies.map((x, i) => {
+      return createMelodyPart(x);
     });
-    this.melodyAnalyser = new Tone.Analyser('fft', 128);
-    this.melodyAnalyser.toMaster();
-    console.log(this.melodyParts);
+
+    this.transport = Tone.Transport;
+    console.log(this.baseNote, this.beat, this.scale);
+  }
+
+  start() {
+    this.beatPart.start(0);
+    this.melodyPart.forEach((x, i) => {
+      x.start(`${2 * i}m`);
+    });
+
+    this.transport.loop = true;
+    this.transport.loopEnd = '5m';
+
+    this.externalLoop();
+
+    this.transport.start('+0.1');
+  }
+
+  stop() {
+    this.transport.stop();
+  }
+
+  genNextMelodySequence(int) {
+    return [...Array(int).keys()].map(x => {
+      return this.melodies.push(buildMelodyPattern(this.scale,
+                                                    this.tension,
+                                                    this.notesPerSequence,
+                                                    timecodes));
+    });
+  }
+
+  externalLoop() {
+    let self = this;
+    new Tone.Loop(function(time) {
+      Tone.Draw.schedule(function(time) {
+        if (self.analyser.getValue()[0] !== -Infinity) {
+          self.fft = self.analyser.getValue();
+        }
+      }, time);
+    }, "0:0:1").start(0);
+  }
+
+  get getTime() {
+    return this.transport.position;
+  }
+
+  get getFft() {
+    return this.fft;
+  }
+
+  get getBpm() {
+    return this.transport.bpm.value;
+  }
+
+  get getTension() {
+    return this.tension;
+  }
+
+  get getVolume() {
+    return this.volume.value;
+  }
+
+  get getDistortion() {
+    return this.distortion.value;
+  }
+
+  get getHihat() {
+    return true;
+  }
+
+  setHihat(int) {
+    //this.set('hihat', int)
+    return int;
+  }
+
+  setVolume(int) {
+    this.volume.value = int;
+    return this.volume.value;
+  }
+
+  setTension(int) {
+    this.tenstion = int;
+    return this.tension;
+  }
+
+  setDistortion(int) {
+    this.distortion.value = int;
+    return this.distortion;
+  }
+
+  setBpm(int) {
+    this.transport.bpm.value = int;
+    return this.transport.bpm.value;
   }
 }
 
-let juke = new JukeTron();
-juke.play();
-//Tone.Transport.start(0);
+let jg = new JukeGen();
+jg.start();
 
-function update() {
-  juke.melodyAnalyser.getValue()[0] !== -Infinity ? console.log(juke.melodyAnalyser.getValue()) : null;
-  requestAnimationFrame(update)
-}
-
-
-//update();
+window.jg = jg;

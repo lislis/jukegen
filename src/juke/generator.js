@@ -116,15 +116,14 @@ export function pickChunkSize() {
 
 export function buildTimeline(length, timecodes) {
   let t = [];
-  [...Array(8).keys()].forEach((x) => {
+  [...Array(length).keys()].forEach((x) => {
     t.push(timecodes.randomElement());
   });
-  //console.log(t.sort());
   return t.sort();
 }
 
-export function buildMelodySegments(scale, intervalMax, timecodes) {
-  let chunkLength = 8;
+export function buildMelodyPattern(scale, intervalMax, amountOfNotes, timecodes) {
+  let chunkLength = amountOfNotes;
   let durations = new DataArray('4n', '8n', '16n');
   let timeline = buildTimeline(chunkLength, timecodes);
   let p = [];
