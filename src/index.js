@@ -34,27 +34,30 @@ export default class JukeGen {
     this.beatPart = createBeatPart(this.beat, this.distortion);
 
     this.melodies = [];
-    this.genNextMelodySequence(4);
-    this.melodyPart = this.melodies.map((x, i) => {
-      return createMelodyPart(x, this.distortion);
-    });
+
+    this.loopCount = 4;
 
     console.log(this.baseNote, this.beat, this.scale);
   }
 
   start() {
     new Tone.Loop((time) => {
+      Tone.Transport.clear();
       this.beatPart.start(0);
-      this.beatPart.loop = 4;
+      this.beatPart.loop = true;
       this.beatPart.loopEnd = '1m';
 
-      this.melodyPart.forEach((x, i) => {
-        x.start(`${1 + i}m`);
+      this.melodies = [];
+      this.genNextMelodySequence(4);
+      this.melodies.forEach((x, i) => {
+        createMelodyPart(x, this.distortion).start(`${i}m`);;
       });
-    }, '4m').start(0);
+      console.log(this.melodies);
 
-    Tone.Transport.loop = 4;
-    Tone.Transport.loopEnd = '4m';
+    }, `${this.loopCount}m`).start(0);
+
+    Tone.Transport.loop = this.loopCount;
+    Tone.Transport.loopEnd = `${this.loopCount}m`;
 
     this.controlLoop();
     Tone.Transport.start('+0.1');
@@ -75,25 +78,7 @@ export default class JukeGen {
 
   controlLoop() {
     let self = this;
-    let timeFlag = false;
     new Tone.Loop(function(time) {
-      let times = Math.floor(Tone.Transport.getSecondsAtTime());
-
-      if (times == 0 && timeFlag === false) {
-        timeFlag = true;
-        Tone.Transport.clear();
-        self.melodies = [];
-        self.genNextMelodySequence(4);
-        self.melodyPart = self.melodies.map((x, i) => {
-          return createMelodyPart(x, self.distortion);
-        });
-
-        console.log('regen', self.melodies);
-      }
-      if (times == 1) {
-        timeFlag = false;
-      }
-
       Tone.Draw.schedule(function(time) {
         if (self.analyser.getValue()[0] !== -Infinity) {
           self.fft = self.analyser.getValue();
@@ -112,6 +97,10 @@ export default class JukeGen {
 
   get getBpm() {
     return Tone.Transport.bpm.value;
+  }
+
+  get getElements() {
+    return true;
   }
 
   get getTension() {
