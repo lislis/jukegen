@@ -11,6 +11,7 @@ export function buildBeatPattern(beatPatterns, baseNote) {
   let note = getNotefromCombinedNote(baseNote);
   let bassNote = combineNoteAndOctave(note, 3);
   let beat = beatPatterns.randomProperty();
+  console.log(beat);
   return beat.map(x => {
     return [x[0], bassNote];
   });

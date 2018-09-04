@@ -15,7 +15,7 @@ export default class JukeGen {
   constructor() {
     this.baseNote = pickRandomNote(notes, octaves);
     this.tension = 4;
-    this.notesPerSequence = 12;
+    this.notesPerSequence = 8;
     this.scale = buildGivenScale(octaves.randomElement(),
                                  this.baseNote,
                                  pickRandomScale(scales),
@@ -31,34 +31,37 @@ export default class JukeGen {
     this.volume.toMaster();
 
     this.beat = buildBeatPattern(beatPatterns, this.baseNote);
-    this.beatPart = createBeatPart(this.beatPart, this.volume);
+    this.beatPart = createBeatPart(this.beat, this.distortion);
 
     this.melodies = [];
     this.genNextMelodySequence(4);
     this.melodyPart = this.melodies.map((x, i) => {
-      return createMelodyPart(x);
+      return createMelodyPart(x, this.distortion);
     });
 
-    this.transport = Tone.Transport;
     console.log(this.baseNote, this.beat, this.scale);
   }
 
   start() {
-    this.beatPart.start(0);
-    this.melodyPart.forEach((x, i) => {
-      x.start(`${2 * i}m`);
-    });
+    new Tone.Loop((time) => {
+      this.beatPart.start(0);
+      this.beatPart.loop = 4;
+      this.beatPart.loopEnd = '1m';
 
-    this.transport.loop = true;
-    this.transport.loopEnd = '5m';
+      this.melodyPart.forEach((x, i) => {
+        x.start(`${1 + i}m`);
+      });
+    }, '4m').start(0);
 
-    this.externalLoop();
+    Tone.Transport.loop = 4;
+    Tone.Transport.loopEnd = '4m';
 
-    this.transport.start('+0.1');
+    this.controlLoop();
+    Tone.Transport.start('+0.1');
   }
 
   stop() {
-    this.transport.stop();
+    Tone.Transport.stop();
   }
 
   genNextMelodySequence(int) {
@@ -70,9 +73,27 @@ export default class JukeGen {
     });
   }
 
-  externalLoop() {
+  controlLoop() {
     let self = this;
+    let timeFlag = false;
     new Tone.Loop(function(time) {
+      let times = Math.floor(Tone.Transport.getSecondsAtTime());
+
+      if (times == 0 && timeFlag === false) {
+        timeFlag = true;
+        Tone.Transport.clear();
+        self.melodies = [];
+        self.genNextMelodySequence(4);
+        self.melodyPart = self.melodies.map((x, i) => {
+          return createMelodyPart(x, self.distortion);
+        });
+
+        console.log('regen', self.melodies);
+      }
+      if (times == 1) {
+        timeFlag = false;
+      }
+
       Tone.Draw.schedule(function(time) {
         if (self.analyser.getValue()[0] !== -Infinity) {
           self.fft = self.analyser.getValue();
@@ -82,7 +103,7 @@ export default class JukeGen {
   }
 
   get getTime() {
-    return this.transport.position;
+    return Tone.Transport.position;
   }
 
   get getFft() {
@@ -90,7 +111,7 @@ export default class JukeGen {
   }
 
   get getBpm() {
-    return this.transport.bpm.value;
+    return Tone.Transport.bpm.value;
   }
 
   get getTension() {
@@ -98,11 +119,11 @@ export default class JukeGen {
   }
 
   get getVolume() {
-    return this.volume.value;
+    return this.volume.volume;
   }
 
   get getDistortion() {
-    return this.distortion.value;
+    return this.distortion.distortion;
   }
 
   get getHihat() {
@@ -115,8 +136,8 @@ export default class JukeGen {
   }
 
   setVolume(int) {
-    this.volume.value = int;
-    return this.volume.value;
+    this.volume.volume = int;
+    return this.volume.volume;
   }
 
   setTension(int) {
@@ -125,13 +146,13 @@ export default class JukeGen {
   }
 
   setDistortion(int) {
-    this.distortion.value = int;
-    return this.distortion;
+    this.distortion.distortion = int;
+    return this.distortion.distortion;
   }
 
   setBpm(int) {
-    this.transport.bpm.value = int;
-    return this.transport.bpm.value;
+    Tone.Transport.bpm.value = int;
+    return Tone.Transport.bpm.value;
   }
 }
 
@@ -139,3 +160,4 @@ let jg = new JukeGen();
 jg.start();
 
 window.jg = jg;
+window.tt = Tone.Transport;

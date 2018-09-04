@@ -1,15 +1,26 @@
 import Tone from 'tone';
 
 export function createBeatPart(beatPattern, output) {
-    let vol = new Tone.Volume(0);
-    let beatSynth = new Tone.Synth().chain(vol, output);
-    beatSynth.probability = 0.7;
-    let part = new Tone.Part(function(time, note) {
-        beatSynth.triggerAttackRelease(note, '4n', time);
-    }, beatPattern);
-    part.loop = true;
-    return part;
+  let vol = new Tone.Volume(3).connect(output);
+
+  let beatSynth = new Tone.Synth({
+    "pitchDecay" : 0.01,
+    "octaves" : 6,
+    "oscillator" : {
+      "type" : "square4"
+    }
+  }).connect(vol);
+
+  //let beatSynth = new Tone.Synth().toMaster();
+  beatSynth.probability = 0.7;
+  let part = new Tone.Part(function(time, note) {
+    beatSynth.triggerAttackRelease(note, '4n', time);
+  }, beatPattern);
+  //part.loop = true;
+  return part;
 }
+
+//export function createHiHat
 
 export function createMelodyPart(melodyPattern, output) {
   let synth = new Tone.Synth().connect(output);
