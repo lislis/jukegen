@@ -153,3 +153,6 @@ export default class JukeGen {
     return Tone.Transport.bpm.value;
   }
 }
+
+//let jg = new JukeGen();
+//jg.start();
