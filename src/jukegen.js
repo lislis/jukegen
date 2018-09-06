@@ -154,8 +154,5 @@ export default class JukeGen {
   }
 }
 
-//let jg = new JukeGen();
-//jg.start();
-
-//window.jg = jg;
-//window.tt = Tone.Transport;
+let jg = new JukeGen();
+jg.start();
