@@ -7,7 +7,7 @@ export class DataArray extends Array {
 export class DataObject extends Object {
   randomPropertyKey() {
     let result = 'randomProperty';
-    while(result === 'randomProperty') {
+    while(result === 'randomProperty' && result !== 'randomPropertyKey') {
       let count = 0;
       for (var prop in this)
         if (Math.random() < 1/++count)

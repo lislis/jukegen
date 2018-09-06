@@ -5,11 +5,11 @@ import { pickRandomNote,
          buildRandomScale,
          pickRandomScale,
          buildRandomPattern,
-         buildMelodyPattern} from './juke/generator';
+         buildMelodyPattern} from './lib/generator';
 import { createBeatPart,
-         createMelodyPart } from './juke/tone-helpers';
-import { scales, notes, octaves, beatPatterns, timecodes } from './juke/data';
-import { DataArray } from './juke/data-classes';
+         createMelodyPart } from './lib/tone-helpers';
+import { scales, notes, octaves, beatPatterns, timecodes } from './lib/data';
+import { DataArray } from './lib/data-classes';
 
 export default class JukeGen {
   constructor() {
@@ -154,8 +154,8 @@ export default class JukeGen {
   }
 }
 
-let jg = new JukeGen();
-jg.start();
+//let jg = new JukeGen();
+//jg.start();
 
-window.jg = jg;
-window.tt = Tone.Transport;
+//window.jg = jg;
+//window.tt = Tone.Transport;
