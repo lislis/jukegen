@@ -31,9 +31,17 @@ export default class JukeGen {
     this.volume.toMaster();
 
     this.beat = buildBeatPattern(beatPatterns, this.baseNote);
-    this.beatPart = createBeatPart(this.beat, this.distortion);
+    this.beatSynth = new Tone.Synth({
+      "pitchDecay" : 0.01,
+      "octaves" : 6,
+      "oscillator" : {
+        "type" : "square4"
+      }
+    }).connect(this.distortion);
+    this.beatPart = createBeatPart(this.beat, this.beatSynth);
 
     this.melodies = [];
+    this.melodySynth = new Tone.Synth().connect(this.distortion);
 
     this.loopCount = 4;
 
@@ -43,6 +51,7 @@ export default class JukeGen {
   start() {
     new Tone.Loop((time) => {
       Tone.Transport.clear();
+
       this.beatPart.start(0);
       this.beatPart.loop = true;
       this.beatPart.loopEnd = '1m';
@@ -50,14 +59,14 @@ export default class JukeGen {
       this.melodies = [];
       this.genNextMelodySequence(4);
       this.melodies.forEach((x, i) => {
-        createMelodyPart(x, this.distortion).start(`${i}m`);;
+        createMelodyPart(x, this.melodySynth).start(`${i}m`);;
       });
       console.log(this.melodies);
 
     }, `${this.loopCount}m`).start(0);
 
     Tone.Transport.loop = this.loopCount;
-    Tone.Transport.loopEnd = `${this.loopCount}m`;
+    Tone.Transport.loopEnd = `${this.loopCount }m`;
 
     this.controlLoop();
     Tone.Transport.start('+0.1');
