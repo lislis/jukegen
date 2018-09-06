@@ -1,10 +1,9 @@
 {
   "name": "jukegen",
   "version": "1.0.0",
-  "description": "",
-  "private": true,
+  "description": "procedurally generated jukebox",
   "main": "dist/jukegen.js",
-  "module": "src/index.js",
+  "module": "src/jukegen.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "watch": "webpack --watch",
@@ -12,7 +11,7 @@
     "build": "webpack"
   },
   "keywords": [],
-  "author": "",
+  "author": "lislis",
   "license": "MIT",
   "devDependencies": {
     "webpack": "^4.17.1",
