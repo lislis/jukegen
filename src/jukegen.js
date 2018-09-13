@@ -177,7 +177,7 @@ export default class JukeGen {
     if (int >= 0 && int <= 1) {
       this.phaser.wet.value = int;
     }
-    return this.reverb.wet;
+    return this.phaser.wet;
   }
 
   setChorus(int) {
