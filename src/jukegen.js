@@ -23,12 +23,23 @@ export default class JukeGen {
 
     this.analyser = new Tone.Analyser('fft', 512);
     this.fft = [];
-    this.volume = new Tone.Volume(0);
-    this.distortion = new Tone.Distortion(0);
+    this.volume = new Tone.Volume();
+    this.distortion = new Tone.Distortion(0.4);
+    this.distortion.wet.value = 0;
+    this.chorus = new Tone.Chorus(4, 2.5, 0.5);
+    this.chorus.wet.value = 0;
+    this.phaser = new Tone.Phaser({
+      "frequency" : 15,
+      "octaves" : 5,
+      "baseFrequency" : 1000
+    });
+    this.phaser.wet.value = 0;
 
-    this.distortion.connect(this.analyser);
-    this.analyser.connect(this.volume);
     this.volume.toMaster();
+    this.distortion.connect(this.chorus);
+    this.chorus.connect(this.phaser);
+    this.phaser.connect(this.analyser);
+    this.analyser.connect(this.volume);
 
     this.beat = buildBeatPattern(beatPatterns, this.baseNote);
     this.beatSynth = new Tone.Synth({
@@ -117,25 +128,35 @@ export default class JukeGen {
   }
 
   get getVolume() {
-    return this.volume.volume;
+    return this.volume.volume.value;
   }
 
   get getDistortion() {
-    return this.distortion.distortion;
+    return this.distortion.wet;
   }
 
-  get getHihat() {
-    return true;
+  get getPhaser() {
+    return this.phaser.wet;
   }
 
-  setHihat(int) {
+  get getChorus() {
+    return this.chorus.wet;
+  }
+
+  //get getHihat() {
+  //  return true;
+  //}
+
+  //setHihat(int) {
     //this.set('hihat', int)
-    return int;
-  }
+  //  return int;
+  //}
 
   setVolume(int) {
-    this.volume.volume = int;
-    return this.volume.volume;
+    if (int >= -20 && int <= 20) {
+      this.volume.volume.value = int;
+    }
+    return this.volume.volume.value;
   }
 
   setTension(int) {
@@ -144,15 +165,34 @@ export default class JukeGen {
   }
 
   setDistortion(int) {
-    this.distortion.distortion = int;
-    return this.distortion.distortion;
+    if (int >= 0 && int <= 1) {
+      this.distortion.wet.value = int;
+    }
+    return this.distortion.wet;
+  }
+
+  setPhaser(int) {
+    if (int >= 0 && int <= 1) {
+      this.phaser.wet.value = int;
+    }
+    return this.reverb.wet;
+  }
+
+  setChorus(int) {
+    if (int >= 0 && int <= 1) {
+      this.chorus.wet.value = int;
+    }
+    return this.chorus.wet;
   }
 
   setBpm(int) {
-    Tone.Transport.bpm.value = int;
+    if (int >= 80 && int <= 200) {
+      Tone.Transport.bpm.value = int;
+    }
     return Tone.Transport.bpm.value;
   }
 }
 
-//let jg = new JukeGen();
-//jg.start();
+let jg = new JukeGen();
+jg.start();
+window.jg = jg;
