@@ -132,15 +132,15 @@ export default class JukeGen {
   }
 
   get getDistortion() {
-    return this.distortion.wet;
+    return this.distortion.wet.value;
   }
 
   get getPhaser() {
-    return this.phaser.wet;
+    return this.phaser.wet.value;
   }
 
   get getChorus() {
-    return this.chorus.wet;
+    return this.chorus.wet.value;
   }
 
   //get getHihat() {
@@ -170,21 +170,21 @@ export default class JukeGen {
     if (int >= 0 && int <= 1) {
       this.distortion.wet.value = int;
     }
-    return this.distortion.wet;
+    return this.distortion.wet.value;
   }
 
   setPhaser(int) {
     if (int >= 0 && int <= 1) {
       this.phaser.wet.value = int;
     }
-    return this.phaser.wet;
+    return this.phaser.wet.value;
   }
 
   setChorus(int) {
     if (int >= 0 && int <= 1) {
       this.chorus.wet.value = int;
     }
-    return this.chorus.wet;
+    return this.chorus.wet.value;
   }
 
   setBpm(int) {
