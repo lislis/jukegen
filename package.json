@@ -1,6 +1,6 @@
 {
   "name": "jukegen",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "procedurally generated jukebox",
   "main": "dist/jukegen.js",
   "module": "src/jukegen.js",
