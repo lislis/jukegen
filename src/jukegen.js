@@ -79,7 +79,6 @@ export default class JukeGen {
     Tone.Transport.loop = this.loopCount;
     Tone.Transport.loopEnd = `${this.loopCount }m`;
 
-    this.controlLoop();
     Tone.Transport.start('+0.1');
   }
 
@@ -96,23 +95,16 @@ export default class JukeGen {
     });
   }
 
-  controlLoop() {
-    let self = this;
-    new Tone.Loop(function(time) {
-      Tone.Draw.schedule(function(time) {
-        if (self.analyser.getValue()[0] !== -Infinity) {
-          self.fft = self.analyser.getValue();
-        }
-      }, time);
-    }, "0:0:1").start(0);
-  }
-
   get getTime() {
     return Tone.Transport.position;
   }
 
   get getFft() {
-    return this.fft;
+    if (this.analyser.getValue()[0] !== -Infinity) {
+      return this.analyser.getValue();
+    } else {
+      return false;
+    }
   }
 
   get getBpm() {
