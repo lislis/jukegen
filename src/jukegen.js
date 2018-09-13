@@ -160,7 +160,9 @@ export default class JukeGen {
   }
 
   setTension(int) {
-    this.tenstion = int;
+    if (int > 1 && int < 10) {
+      this.tenstion = int;
+    }
     return this.tension;
   }
 
@@ -192,7 +194,3 @@ export default class JukeGen {
     return Tone.Transport.bpm.value;
   }
 }
-
-let jg = new JukeGen();
-jg.start();
-window.jg = jg;
