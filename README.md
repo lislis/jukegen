@@ -54,3 +54,8 @@ and some setters:
 `.setVolume(int)` sets the volume.
 
 `.setDistortion(int)` sets the value of the distortion node, should be a number.
+
+
+## No tests?
+
+No, mostly because I gave up on configuring webpack and mocha after two hours. But it is somewhere on my todo list.
