@@ -43,18 +43,25 @@ A JukeGen object exposes some getters:
 
 `.getVolume` gets the volume.
 
-`.getDistortion` JukeGen comes with a distortion node plugged in but it's default value is set to 0 (no distortion).
+`.getDistortion` JukeGen comes with a distortion node plugged in initialized with ToneJS's default value but `.wet` set to 0. This gets the `distortion.wet.value`.
+
+`.getPhaser` JukeGen also comes with a phaser effect node, set to the example from the ToneJS docs and `.wet` set to 0. This gets the `phaser.wet.value`.
+
+`.getChorus` JukeGen also comes with a chorus effect node, set to the example from the ToneJS docs and `.wet` set to 0. This gets the `chorus.wet.value`.
 
 and some setters:
 
-`.setBpm(int)` set the beats per minute.
+`.setBpm(int)` set the beats per minute on the Tone.Transport.
 
-`.setTension(int` tension defines the maximum step (in semitones) two notes can be apart when a new piece of melody is generated. Should be a natural number.
+`.setTension(int)` tension defines the maximum step (in semitones) two notes can be apart when a new piece of melody is generated. Should be a natural number.
 
-`.setVolume(int)` sets the volume.
+`.setVolume(int)` sets the volume in decibel from 0 (start).
 
-`.setDistortion(int)` sets the value of the distortion node, should be a number.
+`.setDistortion(int)` sets the value of distortion wetness, should between 0 and 1.
 
+`.setPhaser(int)` sets the value of phaser wetness, should between 0 and 1.
+
+`.setChorus(int)` sets the value of the chorus wetness, should between 0 and 1.
 
 ## No tests?
 
